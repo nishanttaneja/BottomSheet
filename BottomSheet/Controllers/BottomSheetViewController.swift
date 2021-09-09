@@ -9,17 +9,35 @@ import UIKit
 
 class BottomSheetViewController: UIViewController, BottomSheetViewDelegate {
     
-    // MARK: Lifecycle
+    // MARK: Subviews
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        updateView()
+    private let bottomSheetView: BottomSheetView
+    
+    
+    // MARK: Constructors
+    
+    init() {
+        bottomSheetView = BottomSheetView()
+        super.init(nibName: nil, bundle: nil)
+        bottomSheetView.delegate = self
+        self.view = bottomSheetView
     }
     
-    private func updateView() {
-        let bottomSheetView = BottomSheetView(frame: view.frame)
-        bottomSheetView.delegate = self
-        view = bottomSheetView
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    
+    // MARK: Lifecycle
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        bottomSheetView.presentBottomSheet()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        bottomSheetView.dismissBottomSheet()
     }
     
     
