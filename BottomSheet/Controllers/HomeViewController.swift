@@ -13,6 +13,8 @@ class HomeViewController: UIViewController, HomeViewDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        title = kHomeTitle
+        navigationController?.navigationBar.prefersLargeTitles = true
         updateView()
     }
     
