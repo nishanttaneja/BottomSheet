@@ -28,7 +28,10 @@ class HomeViewController: UIViewController, HomeViewDelegate {
     // MARK: HomeViewDelegate
     
     func homeView(_ view: HomeView, didSelect button: UIButton) {
-        print(#function)
+        let bottomSheetVC = BottomSheetViewController()
+        bottomSheetVC.modalTransitionStyle = .crossDissolve
+        bottomSheetVC.modalPresentationStyle = .overCurrentContext
+        present(bottomSheetVC, animated: true)
     }
 
 }
