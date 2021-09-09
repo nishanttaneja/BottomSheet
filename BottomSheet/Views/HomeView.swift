@@ -27,7 +27,7 @@ final class HomeView: UIView {
     private(set) lazy var button: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle(kHomeButtonTitle, for: .normal)
+        button.setTitle(kBottomSheetTitle, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .link
         button.layer.cornerRadius = buttonHeight/3
