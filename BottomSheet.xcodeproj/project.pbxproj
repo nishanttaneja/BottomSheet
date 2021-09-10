@@ -16,6 +16,8 @@
 		B8A575C826EA9DDF009EDA72 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A575C726EA9DDF009EDA72 /* Constants.swift */; };
 		B8A575CB26EAA45F009EDA72 /* BottomSheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A575CA26EAA45F009EDA72 /* BottomSheetViewController.swift */; };
 		B8A575CD26EAA4F8009EDA72 /* BottomSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A575CC26EAA4F8009EDA72 /* BottomSheetView.swift */; };
+		B8DECAAC26EB2BF0005DDF67 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B8DECAAB26EB2BF0005DDF67 /* README.md */; };
+		B8DECAAE26EB2C95005DDF67 /* demo.gif in Resources */ = {isa = PBXBuildFile; fileRef = B8DECAAD26EB2C95005DDF67 /* demo.gif */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +32,8 @@
 		B8A575C726EA9DDF009EDA72 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		B8A575CA26EAA45F009EDA72 /* BottomSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetViewController.swift; sourceTree = "<group>"; };
 		B8A575CC26EAA4F8009EDA72 /* BottomSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetView.swift; sourceTree = "<group>"; };
+		B8DECAAB26EB2BF0005DDF67 /* README.md */ = {isa = PBXFileReference; explicitFileType = sourcecode.make; path = README.md; sourceTree = "<group>"; };
+		B8DECAAD26EB2C95005DDF67 /* demo.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = demo.gif; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +50,8 @@
 		B8A575A326EA9C65009EDA72 = {
 			isa = PBXGroup;
 			children = (
+				B8DECAAB26EB2BF0005DDF67 /* README.md */,
+				B8DECAAD26EB2C95005DDF67 /* demo.gif */,
 				B8A575AE26EA9C65009EDA72 /* BottomSheet */,
 				B8A575AD26EA9C65009EDA72 /* Products */,
 			);
@@ -158,6 +164,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B8DECAAC26EB2BF0005DDF67 /* README.md in Resources */,
+				B8DECAAE26EB2C95005DDF67 /* demo.gif in Resources */,
 				B8A575BC26EA9C66009EDA72 /* LaunchScreen.storyboard in Resources */,
 				B8A575B926EA9C66009EDA72 /* Assets.xcassets in Resources */,
 			);
