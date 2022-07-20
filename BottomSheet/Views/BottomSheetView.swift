@@ -7,42 +7,63 @@
 
 import UIKit
 
-@objc protocol BottomSheetViewDelegate: NSObjectProtocol {
-    @objc optional func bottomSheetViewDidSelect(view: BottomSheetView)
+protocol BottomSheetViewDataSource: NSObjectProtocol {
+    func viewToDisplayAsBottomSheetView() -> UIView
+}
+
+protocol BottomSheetViewDelegate: NSObjectProtocol {
+    func bottomSheetViewDidSelect(view: BottomSheetView)
 }
 
 class BottomSheetView: UIView {
     
-    // MARK: Subviews
+    // MARK: - Constants
     
-    private lazy var contentView: UIView = {
+    private let defaultHeight: CGFloat = 300
+    private let maximumHeight: CGFloat = UIScreen.main.bounds.height - 64
+    private let dismissibleHeight: CGFloat = 200
+    private let titleLabelHeight: CGFloat = 44
+    private let padding: CGFloat = 16
+    private let itemSpacing: CGFloat = 8
+    let animationDuration: CGFloat = 0.4
+    private let contentBarHeight: CGFloat = 32
+    
+    
+    // MARK: - Subviews
+    
+    private let contentView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(contentStackView)
         view.backgroundColor = .white
         view.layer.cornerRadius = 16
         view.clipsToBounds = true
         return view
     }()
     
-    private(set) lazy var titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = kBottomSheetTitle
-        label.font = .systemFont(ofSize: 24, weight: .heavy)
-        label.textColor = .black
-        return label
+    private let barView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .lightGray
+//        view.contentMode = .scaleToFill
+        view.layer.cornerRadius = 4
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.widthAnchor.constraint(equalToConstant: 60).isActive = true
+        view.heightAnchor.constraint(equalToConstant: 8).isActive = true
+        return view
     }()
-    
-    private(set) lazy var textLabel: UILabel = {
-        let label = UILabel()
-        label.text = kPlaceholderText
-        label.numberOfLines = 0
-        label.font = .systemFont(ofSize: 14)
-        return label
+    private lazy var contentBarView: UIView = {
+        let stack = UIStackView(arrangedSubviews: [.init(), barView, .init()])
+        stack.distribution = .equalCentering
+        let stackView = UIStackView(arrangedSubviews: [.init(), stack, .init()])
+        stackView.distribution = .equalCentering
+//        stackView.alignment = .top
+//        stackView.backgroundColor = backgroundColor?.withAlphaComponent(0.2)
+        stackView.axis = .vertical
+        stackView.isUserInteractionEnabled = true
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
     }()
-    
     private lazy var contentStackView: UIStackView = {
-        let stack = UIStackView(arrangedSubviews: [titleLabel, textLabel, .init()])
+        let stack = UIStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.axis = .vertical
         stack.spacing = itemSpacing
@@ -50,90 +71,56 @@ class BottomSheetView: UIView {
     }()
     
     
-    // MARK: Properties
-    
-    weak var delegate: BottomSheetViewDelegate?
-    
-    // Gesture
-    private var panGesture: UIPanGestureRecognizer!
-    
-    // Height
-    private let defaultHeight: CGFloat = 300
+    // MARK: - Properties
+        
     private var currentHeight: CGFloat = 300
-    private let maximumHeight: CGFloat = UIScreen.main.bounds.height - 64
-    private let dismissibleHeight: CGFloat = 200
-    
-    private let titleLabelHeight: CGFloat = 44
-    
-    private let padding: CGFloat = 16
-    private let itemSpacing: CGFloat = 8
+
+    // Gestures
+    private var panGestureRecognizer: UIPanGestureRecognizer! = nil
+    private var tapGestureRecognizer: UITapGestureRecognizer! = nil
     
     
-    // MARK: Constraints
+    // MARK: - Delegations
+    
+    weak var dataSource: BottomSheetViewDataSource? = nil {
+        didSet {
+            guard let newView = dataSource?.viewToDisplayAsBottomSheetView() else { return }
+            contentStackView.addArrangedSubview(newView)
+        }
+    }
+    weak var delegate: BottomSheetViewDelegate? = nil
+    
+    
+    // MARK: - Constraints
     
     // ContentView
-    private var contentViewHeightConstraint: NSLayoutConstraint?
-    private var contentViewBottomConstraint: NSLayoutConstraint?
-    private lazy var contentViewConstraints: [NSLayoutConstraint] = {
-        contentViewHeightConstraint = contentView.heightAnchor.constraint(equalToConstant: defaultHeight)
-        contentViewBottomConstraint = contentView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: defaultHeight)
-        return [
-            contentView.leftAnchor.constraint(equalTo: leftAnchor),
-            contentView.rightAnchor.constraint(equalTo: rightAnchor),
-            contentViewBottomConstraint!,
-            contentViewHeightConstraint!
-        ]
-    }()
+    private var contentViewHeightConstraint: NSLayoutConstraint! = nil
+    private var contentViewBottomConstraint: NSLayoutConstraint! = nil
+
+    
+    // MARK: - Presentation
     
     func presentBottomSheet() {
         contentViewBottomConstraint?.constant = 0
-        UIView.animate(withDuration: 0.4) {
+        UIView.animate(withDuration: animationDuration) {
             self.layoutIfNeeded()
         }
     }
     
     func dismissBottomSheet() {
         contentViewBottomConstraint?.constant = defaultHeight
-        UIView.animate(withDuration: 0.4) {
+        UIView.animate(withDuration: animationDuration) {
             self.layoutIfNeeded()
         }
     }
     
-    // TitleLabel
-    private lazy var contentStackConstraints: [NSLayoutConstraint] = {[
-        contentStackView.topAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.topAnchor, constant: padding),
-        contentStackView.leftAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.leftAnchor, constant: padding),
-        contentStackView.bottomAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.bottomAnchor, constant: -padding),
-        contentStackView.rightAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.rightAnchor, constant: -padding)
-    ]}()
-    
-
-    // MARK: Constructors
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        backgroundColor = .black.withAlphaComponent(0.8)
-        addSubview(contentView)
-        NSLayoutConstraint.activate(contentViewConstraints + contentStackConstraints)
-        configGesture()
-    }
-    
-    private func configGesture() {
-        panGesture = .init(target: self, action: #selector(handleViewPanGesture(recognizer:)))
-        panGesture.delaysTouchesBegan = false
-        panGesture.delaysTouchesEnded = false
-        addGestureRecognizer(panGesture)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    
-    // MARK: Selectors
-    
-    @objc private func handleViewTapGesture(recognizer: UITapGestureRecognizer) {
-        delegate?.bottomSheetViewDidSelect?(view: self)
+    private func configGestures() {
+        panGestureRecognizer = .init(target: self, action: #selector(handleViewPanGesture(recognizer:)))
+        panGestureRecognizer.delaysTouchesBegan = false
+        panGestureRecognizer.delaysTouchesEnded = false
+        addGestureRecognizer(panGestureRecognizer)
+        tapGestureRecognizer = .init(target: self, action: #selector(handleViewTapGesture(recognizer:)))
+        addGestureRecognizer(tapGestureRecognizer)
     }
     
     @objc private func handleViewPanGesture(recognizer: UIPanGestureRecognizer) {
@@ -150,7 +137,7 @@ class BottomSheetView: UIView {
         case .ended:
             if newHeight < dismissibleHeight {
                 dismissBottomSheet()
-                delegate?.bottomSheetViewDidSelect?(view: self)
+                delegate?.bottomSheetViewDidSelect(view: self)
             } else if newHeight < defaultHeight {
                 updateHeightWithAnimation(to: defaultHeight)
             } else if newHeight < maximumHeight, isDraggingDown {
@@ -164,11 +151,57 @@ class BottomSheetView: UIView {
     
     private func updateHeightWithAnimation(to newHeight: CGFloat) {
         contentViewHeightConstraint?.constant = newHeight
-        UIView.animate(withDuration: 0.4) {
+        UIView.animate(withDuration: animationDuration) {
             self.layoutIfNeeded()
         } completion: { _ in
             self.currentHeight = newHeight
         }
     }
     
+    @objc private func handleViewTapGesture(recognizer: UITapGestureRecognizer) {
+        delegate?.bottomSheetViewDidSelect(view: self)
+    }
+    
+    
+    // MARK: - Configuration
+    
+    private func config() {
+        backgroundColor = .clear
+        contentView.addSubview(contentBarView)
+        contentView.addSubview(contentStackView)
+        addSubview(contentView)
+        configConstraints()
+        configGestures()
+    }
+    
+    private func configConstraints() {
+        contentViewHeightConstraint = contentView.heightAnchor.constraint(equalToConstant: defaultHeight)
+        contentViewBottomConstraint = contentView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: defaultHeight)
+        NSLayoutConstraint.activate([
+            // ContentView
+            contentView.leftAnchor.constraint(equalTo: leftAnchor),
+            contentView.rightAnchor.constraint(equalTo: rightAnchor),
+            contentViewBottomConstraint,
+            contentViewHeightConstraint,
+            // ContentBarView
+            contentBarView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            contentBarView.leftAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.leftAnchor),
+            contentBarView.rightAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.rightAnchor),
+            contentBarView.heightAnchor.constraint(equalToConstant: contentBarHeight),
+            // Content Stack
+            contentStackView.topAnchor.constraint(equalTo: contentBarView.bottomAnchor, constant: .zero),
+            contentStackView.leftAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.leftAnchor, constant: padding),
+            contentStackView.bottomAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.bottomAnchor, constant: -padding),
+            contentStackView.rightAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.rightAnchor, constant: -padding)
+        ])
+    }
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        config()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
