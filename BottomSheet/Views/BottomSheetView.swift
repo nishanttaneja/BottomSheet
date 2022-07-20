@@ -19,7 +19,6 @@ class BottomSheetView: UIView {
     
     // MARK: - Constants
     
-    private let defaultHeight: CGFloat = 300
     private let maximumHeight: CGFloat = UIScreen.main.bounds.height - 64
     private let dismissibleHeight: CGFloat = 200
     private let titleLabelHeight: CGFloat = 44
@@ -43,7 +42,6 @@ class BottomSheetView: UIView {
     private let barView: UIView = {
         let view = UIView()
         view.backgroundColor = .lightGray
-//        view.contentMode = .scaleToFill
         view.layer.cornerRadius = 4
         view.translatesAutoresizingMaskIntoConstraints = false
         view.widthAnchor.constraint(equalToConstant: 60).isActive = true
@@ -55,8 +53,6 @@ class BottomSheetView: UIView {
         stack.distribution = .equalCentering
         let stackView = UIStackView(arrangedSubviews: [.init(), stack, .init()])
         stackView.distribution = .equalCentering
-//        stackView.alignment = .top
-//        stackView.backgroundColor = backgroundColor?.withAlphaComponent(0.2)
         stackView.axis = .vertical
         stackView.isUserInteractionEnabled = true
         stackView.translatesAutoresizingMaskIntoConstraints = false
@@ -72,7 +68,14 @@ class BottomSheetView: UIView {
     
     
     // MARK: - Properties
-        
+    
+    var minimumHeight: CGFloat = 300 {
+        willSet {
+            currentHeight = newValue
+            contentViewHeightConstraint.constant = newValue
+            contentViewBottomConstraint.constant = newValue
+        }
+    }
     private var currentHeight: CGFloat = 300
 
     // Gestures
@@ -108,7 +111,7 @@ class BottomSheetView: UIView {
     }
     
     func dismissBottomSheet() {
-        contentViewBottomConstraint?.constant = defaultHeight
+        contentViewBottomConstraint?.constant = minimumHeight
         UIView.animate(withDuration: animationDuration) {
             self.layoutIfNeeded()
         }
@@ -138,11 +141,11 @@ class BottomSheetView: UIView {
             if newHeight < dismissibleHeight {
                 dismissBottomSheet()
                 delegate?.bottomSheetViewDidSelect(view: self)
-            } else if newHeight < defaultHeight {
-                updateHeightWithAnimation(to: defaultHeight)
+            } else if newHeight < minimumHeight {
+                updateHeightWithAnimation(to: minimumHeight)
             } else if newHeight < maximumHeight, isDraggingDown {
-                updateHeightWithAnimation(to: defaultHeight)
-            } else if newHeight > defaultHeight, !isDraggingDown {
+                updateHeightWithAnimation(to: minimumHeight)
+            } else if newHeight > minimumHeight, !isDraggingDown {
                 updateHeightWithAnimation(to: maximumHeight)
             }
         default: break
@@ -175,8 +178,8 @@ class BottomSheetView: UIView {
     }
     
     private func configConstraints() {
-        contentViewHeightConstraint = contentView.heightAnchor.constraint(equalToConstant: defaultHeight)
-        contentViewBottomConstraint = contentView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: defaultHeight)
+        contentViewHeightConstraint = contentView.heightAnchor.constraint(equalToConstant: minimumHeight)
+        contentViewBottomConstraint = contentView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: minimumHeight)
         NSLayoutConstraint.activate([
             // ContentView
             contentView.leftAnchor.constraint(equalTo: leftAnchor),

@@ -88,6 +88,7 @@ class BottomSheetViewController: UIViewController, BottomSheetViewDelegate, Bott
     init() {
         bottomSheetView = BottomSheetView()
         super.init(nibName: nil, bundle: nil)
+        bottomSheetView.minimumHeight = 200
         bottomSheetView.delegate = self
         bottomSheetView.dataSource = self
         config()
